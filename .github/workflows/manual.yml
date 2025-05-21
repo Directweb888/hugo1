@@ -1,0 +1,36 @@
+name: Build and Deploy Hugo Site
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout Code
+      uses: actions/checkout@v3
+
+    - name: Setup Hugo
+      uses: peaceiris/actions-hugo@v2
+      with:
+        hugo-version: '0.124.1'
+
+    - name: Install Python & YAML
+      run: |
+        sudo apt-get update
+        sudo apt-get install python3-pip -y
+        pip3 install pyyaml
+
+    - name: Run Build Script
+      run: |
+        python3 build.py
+        hugo -s . -d public
+
+    - name: Deploy to GitHub Pages
+      uses: peaceiris/actions-gh-pages@v3
+      with:
+        github_token: ${{ secrets.GITHUB_TOKEN }}
+        publish_dir: ./public
